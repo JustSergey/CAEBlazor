@@ -49,7 +49,8 @@
                     @employee.Company.Name
                 </th>
                 <th>
-                    <a href="/employees/edit/@employee.Id">Edit</a> | 
+                    <a href="/employees/@employee.Id">Details</a> |
+                    <a href="/employees/edit/@employee.Id">Edit</a> |
                     <a href="" @onclick="() => DeleteEmployee(employee.Id)" @onclick:preventDefault>Delete</a>
                 </th>
             </tr>

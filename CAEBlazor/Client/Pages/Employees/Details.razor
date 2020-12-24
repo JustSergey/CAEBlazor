@@ -1,0 +1,46 @@
+﻿@page "/employees/{Id:int}"
+@inject HttpClient Http
+@using CAEBlazor.Shared.Models
+
+<h1>Details</h1>
+
+<dl>
+    <div class="form-group">
+        <dt>@nameof(Employee.Name)</dt>
+        <dd>@employee.Name</dd>
+    </div>
+    <div class="form-group">
+        <dt>@nameof(Employee.Surname)</dt>
+        <dd>@employee.Surname</dd>
+    </div>
+    <div class="form-group">
+        <dt>@nameof(Employee.Patronymic)</dt>
+        <dd>@employee.Patronymic</dd>
+    </div>
+    <div class="form-group">
+        <dt>@nameof(Employee.PhoneNumber)</dt>
+        <dd>@employee.PhoneNumber</dd>
+    </div>
+    <div class="form-group">
+        <dt>@nameof(Employee.Company)</dt>
+        @if (employee.Company != null)
+        {
+            <dd>@employee.Company.Name</dd>
+        }
+    </div>
+</dl>
+<hr />
+<a href="/employees">Close</a>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Employee employee = new Employee();
+
+    protected override async Task OnInitializedAsync()
+    {
+        employee = await Http.GetFromJsonAsync<Employee>($"/api/employees/{Id}");
+        employee.Company = await Http.GetFromJsonAsync<Company>($"/api/companies/{employee.CompanyId}");
+        await base.OnInitializedAsync();
+    }
+}

@@ -1,0 +1,26 @@
+﻿@page "/companies/{Id:int}"
+@inject HttpClient Http
+@using CAEBlazor.Shared.Models
+
+<h1>Details</h1>
+
+<dl>
+    <div class="form-group">
+        <dt>@nameof(Company.Name)</dt>
+        <dd>@company.Name</dd>
+    </div>
+</dl>
+<hr />
+<a href="/companies">Close</a>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Company company = new Company();
+
+    protected override async Task OnInitializedAsync()
+    {
+        company = await Http.GetFromJsonAsync<Company>($"/api/companies/{Id}");
+        await base.OnInitializedAsync();
+    }
+}

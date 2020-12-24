@@ -24,6 +24,7 @@
                     @company.Name
                 </th>
                 <th>
+                    <a href="/companies/@company.Id">Details</a> |
                     <a href="/companies/edit/@company.Id">Edit</a> |
                     <a href="" @onclick="() => DeleteCompany(company.Id)" @onclick:preventDefault>Delete</a>
                 </th>
@@ -44,7 +45,7 @@
     private async Task DeleteCompany(int id)
     {
         companies.RemoveAll(c => c.Id == id);
-        await Http.DeleteAsync($"/api/companies/{id}");
         StateHasChanged();
+        await Http.DeleteAsync($"/api/companies/{id}");
     }
 }
