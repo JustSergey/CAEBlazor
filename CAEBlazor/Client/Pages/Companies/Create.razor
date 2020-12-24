@@ -1,0 +1,30 @@
+﻿@page "/companies/create"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using CAEBlazor.Shared.Models
+
+<h1>Create</h1>
+
+<EditForm Model="company" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <dl>
+        <div class="form-group">
+            <dt>@nameof(Company.Name)</dt>
+            <dd><InputText @bind-Value="company.Name" /></dd>
+        </div>
+    </dl>
+
+    <button type="submit">Create</button>
+</EditForm>
+
+@code {
+    private Company company = new Company();
+
+    private async void OnValidSubmit()
+    {
+        await Http.PostAsJsonAsync<Company>($"/api/companies", company);
+        NavigationManager.NavigateTo("/companies");
+    }
+}

@@ -1,0 +1,38 @@
+﻿@page "/companies/edit/{Id:int}"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using CAEBlazor.Shared.Models
+
+<h1>Edit</h1>
+
+<EditForm Model="company" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <dl>
+        <div class="form-group">
+            <dt>@nameof(Company.Name)</dt>
+            <dd><InputText @bind-Value="company.Name" /></dd>
+        </div>
+    </dl>
+
+    <button type="submit">Save</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Company company = new Company();
+
+    protected override async Task OnInitializedAsync()
+    {
+        company = await Http.GetFromJsonAsync<Company>($"/api/companies/{Id}");
+        await base.OnInitializedAsync();
+    }
+
+    private async void OnValidSubmit()
+    {
+        await Http.PutAsJsonAsync<Company>($"/api/companies/{Id}", company);
+        NavigationManager.NavigateTo("/companies");
+    }
+}

@@ -1,0 +1,63 @@
+﻿@page "/employees/edit/{Id:int}"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using CAEBlazor.Shared.Models
+
+<h1>Edit</h1>
+
+<EditForm Model="employee" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <dl>
+        <div class="form-group">
+            <dt>@nameof(Employee.Name)</dt>
+            <dd><InputText @bind-Value="employee.Name" /></dd>
+        </div>
+        <div class="form-group">
+            <dt>@nameof(Employee.Surname)</dt>
+            <dd><InputText @bind-Value="employee.Surname" /></dd>
+        </div>
+        <div class="form-group">
+            <dt>@nameof(Employee.Patronymic)</dt>
+            <dd><InputText @bind-Value="employee.Patronymic" /></dd>
+        </div>
+        <div class="form-group">
+            <dt>@nameof(Employee.PhoneNumber)</dt>
+            <dd><InputText @bind-Value="employee.PhoneNumber" /></dd>
+        </div>
+        <div class="form-group">
+            <dt>@nameof(Employee.Company)</dt>
+            <dd>
+                <InputSelect @bind-Value="employee.CompanyId">
+                    @foreach (Company company in companies)
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                </InputSelect>
+            </dd>
+        </div>
+    </dl>
+
+    <button type="submit">Save</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Employee employee = new Employee();
+    private List<Company> companies = new List<Company>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        employee = await Http.GetFromJsonAsync<Employee>($"/api/employees/{Id}");
+        companies = await Http.GetFromJsonAsync<List<Company>>("/api/companies");
+        await base.OnInitializedAsync();
+    }
+
+    private async void OnValidSubmit()
+    {
+        await Http.PutAsJsonAsync<Employee>($"/api/employees/{Id}", employee);
+        NavigationManager.NavigateTo("/employees");
+    }
+}

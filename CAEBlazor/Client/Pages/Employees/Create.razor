@@ -1,0 +1,61 @@
+﻿@page "/employees/create"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using CAEBlazor.Shared.Models
+
+<h1>Create</h1>
+
+<EditForm Model="employee" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <dl>
+        <div class="form-group">
+            <dt>@nameof(Employee.Name)</dt>
+            <dd><InputText @bind-Value="employee.Name" /></dd>
+        </div>
+        <div class="form-group">
+            <dt>@nameof(Employee.Surname)</dt>
+            <dd><InputText @bind-Value="employee.Surname" /></dd>
+        </div>
+        <div class="form-group">
+            <dt>@nameof(Employee.Patronymic)</dt>
+            <dd><InputText @bind-Value="employee.Patronymic" /></dd>
+        </div>
+        <div class="form-group">
+            <dt>@nameof(Employee.PhoneNumber)</dt>
+            <dd><InputText @bind-Value="employee.PhoneNumber" /></dd>
+        </div>
+        <div class="form-group">
+            <dt>@nameof(Employee.Company)</dt>
+            <dd>
+                <InputSelect @bind-Value="employee.CompanyId">
+                    @foreach (Company company in companies)
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                </InputSelect>
+            </dd>
+        </div>
+    </dl>
+
+    <button type="submit">Create</button>
+</EditForm>
+
+@code {
+    private Employee employee = new Employee();
+    private List<Company> companies = new List<Company>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        companies = await Http.GetFromJsonAsync<List<Company>>("/api/companies");
+        employee.CompanyId = companies.First().Id;
+        await base.OnInitializedAsync();
+    }
+
+    private async void OnValidSubmit()
+    {
+        await Http.PostAsJsonAsync<Employee>($"/api/employees", employee);
+        NavigationManager.NavigateTo("/employees");
+    }
+}

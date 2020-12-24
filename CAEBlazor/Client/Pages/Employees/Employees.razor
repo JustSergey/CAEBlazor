@@ -1,0 +1,103 @@
+﻿@page "/employees"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+@using CAEBlazor.Shared.Models
+
+<h1>Employees</h1>
+
+<p>
+    <a href="/employees/create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @nameof(Employee.Name)
+            </th>
+            <th>
+                @nameof(Employee.Surname)
+            </th>
+            <th>
+                @nameof(Employee.Patronymic)
+            </th>
+            <th>
+                @nameof(Employee.PhoneNumber)
+            </th>
+            <th>
+                @nameof(Employee.Company)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Employee employee in employees)
+        {
+            <tr>
+                <th>
+                    @employee.Name
+                </th>
+                <th>
+                    @employee.Surname
+                </th>
+                <th>
+                    @employee.Patronymic
+                </th>
+                <th>
+                    @employee.PhoneNumber
+                </th>
+                <th>
+                    @employee.Company.Name
+                </th>
+                <th>
+                    <a href="/employees/edit/@employee.Id">Edit</a> | 
+                    <a href="" @onclick="() => DeleteEmployee(employee.Id)" @onclick:preventDefault>Delete</a>
+                </th>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private HubConnection hubConnection;
+    private List<Employee> employees = new List<Employee>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/employeeshub")).Build();
+
+        hubConnection.On<List<Employee>>("UpdateEmployees", (employees) =>
+        {
+            this.employees = employees;
+            StateHasChanged();
+        });
+
+        hubConnection.On<Employee>("AddEmployee", (employee) =>
+        {
+            employees.Add(employee);
+            StateHasChanged();
+        });
+
+        hubConnection.On<Employee>("UpdateEmployee", (employee) =>
+        {
+            int index = employees.FindIndex(e => e.Id == employee.Id);
+            if (index >= 0)
+                employees[index] = employee;
+            StateHasChanged();
+        });
+
+        hubConnection.On<int>("DeleteEmployee", (id) =>
+        {
+            employees.RemoveAll(e => e.Id == id);
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task DeleteEmployee(int id)
+    {
+        await hubConnection.InvokeAsync("DeleteEmployee", id);
+    }
+}
